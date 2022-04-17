@@ -6,16 +6,15 @@ import java.util.Stack;
 
 public class KeyValueStore {
     private Stack<Transaction> transactions;
-    private HashMap<String, Entry> globalMap;
-    private HashMap<String, Entry> currentState;
+    private HashMap<String, Entry> globalMap, currentState;
 
     KeyValueStore() {
-        transactions = new Stack<Transaction>();
+        transactions = new Stack<>();
         globalMap = new HashMap<>();
-        resetCurrentTransactionState();
+        resetCurrentTransaction();
     }
 
-    private void resetCurrentTransactionState() {
+    private void resetCurrentTransaction() {
         currentState = new HashMap<>();
         //when resetting the current transaction state,
         //we also need to remove current Tx from the current context which
@@ -61,7 +60,7 @@ public class KeyValueStore {
             throw new RuntimeException("There is no transaction available to commit");
         }
         globalMap = currentState;
-        resetCurrentTransactionState();
+        resetCurrentTransaction();
 
     }
 
