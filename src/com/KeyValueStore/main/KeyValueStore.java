@@ -5,17 +5,16 @@ import java.util.HashMap;
 import java.util.Stack;
 
 public class KeyValueStore {
-    private Stack<Transaction> transactions;
-    private HashMap<String, Entry> globalMap;
-    private HashMap<String, Entry> currentState;
+    private final Stack<Transaction> transactions;
+    private HashMap<String, Entry> globalMap, currentState;
 
-    KeyValueStore() {
-        transactions = new Stack<Transaction>();
+    public KeyValueStore() {
+        transactions = new Stack<>();
         globalMap = new HashMap<>();
-        resetCurrentTransactionState();
+        resetCurrentTransaction();
     }
 
-    private void resetCurrentTransactionState() {
+    private void resetCurrentTransaction() {
         currentState = new HashMap<>();
         //when resetting the current transaction state,
         //we also need to remove current Tx from the current context which
@@ -38,65 +37,66 @@ public class KeyValueStore {
 
     }
 
-    public void set(String key, Entry value) {
+    public String set(String key, Entry value) {
         //when we are trying to set any key and there is no context available
         //in the runtime; then we set the key in the global Space
         if (transactions.isEmpty()) {
             globalMap.put(key, value);
-            return;
+            return "OK!";
         }
 
         //add this operation into the list of operations
         //which are maintained in the transaction
         var cur = transactions.peek();
         cur.addItem(key, value);
+        return "OK!";
+
     }
 
-    public void unSet(String key) {
+    public String unSet(String key) {
+        return "";
     }
 
 
-    public void commit() {
+    public String commit() {
         if (transactions.isEmpty()) {
             throw new RuntimeException("There is no transaction available to commit");
         }
         globalMap = currentState;
-        resetCurrentTransactionState();
-
+        resetCurrentTransaction();
+        return "";
     }
 
-    public void rollBack() {
-        if (transactions.isEmpty()) return;
+    public String rollBack() {
+        if (transactions.isEmpty()) return "";
         //when rollBack operation is executed, we remove
         //all the operations of this transaction
         //from the current context
         transactions.pop();
+        return "";
     }
 
-    public void begin() {
+    public String begin() {
         //initiate a new Tx
         Transaction newTransaction = new Transaction();
         transactions.push(newTransaction);
-    }
-
-    private void checkAndIncrement(Entry entry, int value, int freqCount) {
-        if (entry.getValue() == value) {
-            ++freqCount;
-        }
+        return "";
     }
 
     public int getNumberWithValue(int value) {
         int freqCount = 0;
-        //If there is no active Tx then we get the count from globalMap
-        if (transactions.isEmpty()) {
-            for (var entry : globalMap.entrySet()) {
-                checkAndIncrement(entry.getValue(), value, freqCount);
-            }
-        } else {
-            for (var entry : currentState.entrySet()) {
-                checkAndIncrement(entry.getValue(), value, freqCount);
+        var map = getMap();
+        for (var entry : map.entrySet()) {
+            if (entry.getValue().getValue() == value) {
+                ++freqCount;
             }
         }
         return freqCount;
+    }
+
+    private HashMap<String, Entry> getMap() {
+        //If there is no active Tx then we get the count from globalMap
+        if (transactions.isEmpty()) return globalMap;
+        return currentState;
     }
 }
