@@ -1,5 +1,11 @@
 package com.KeyValueStore.main;
 
+
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
 public class Entry {
     private Integer value;
 
